@@ -15,7 +15,7 @@ body{
 }
 
 .topo{
-    background-color:#2E7D32;
+    background-color:#ffec72ff;
     color:white;
     padding:15px;
 }
@@ -31,23 +31,23 @@ body{
 
 .caixa{
     background:white;
-    border:1px solid #ccc;
+    border:1px solid #fff6bcff;
     border-radius:8px;
     padding:20px;
     margin-bottom:20px;
 }
 
 .caixa h4{
-    color:#2E7D32;
+    color:#ffec72ff;
 }
 
 .botao{
-    background:#2E7D32;
+    background:#ffec72ff;
     color:white;
 }
 
 .botao:hover{
-    background:#1f5c25;
+    background:#ffec72ff;
     color:white;
 }
 
