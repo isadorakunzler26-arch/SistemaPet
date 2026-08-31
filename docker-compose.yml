@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+
+  web:
+    build: .
+    container_name: sistema_pet
+
+    ports:
+      - "8080:80"
+
+    volumes:
+      - ./app:/var/www/html
+
+    depends_on:
+      - banco
+
+  banco:
+    image: mysql:8.0
+
+    container_name: mysql_pet
+
+    restart: always
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: petshop
+      MYSQL_USER: pet
+      MYSQL_PASSWORD: pet123
+
+    ports:
+      - "3306:3306"
+
+    volumes:
+      - banco_mysql:/var/lib/mysql
+      - ./banco:/docker-entrypoint-initdb.d
+
+volumes:
+  banco_mysql:
