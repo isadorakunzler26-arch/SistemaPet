@@ -1,6 +1,6 @@
 <?php
 
-$host = "banco";
+$host = "mysql";
 $usuario = "pet";
 $senha = "pet123";
 $banco = "petshop";
@@ -12,8 +12,10 @@ $conexao = mysqli_connect(
     $banco
 );
 
-if(!$conexao){
-    die("Erro ao conectar.");
+if (!$conexao) {
+    die("Erro ao conectar ao banco de dados.");
 }
+
+mysqli_set_charset($conexao, "utf8mb4");
 
 ?>
