@@ -1,13 +1,32 @@
+<?php
+
+require_once __DIR__ . "/conexao.php";
+
+$sql = "SELECT id, nome FROM especie ORDER BY id ASC";
+
+$resultado = $conn->query($sql);
+
+if (!$resultado) {
+    die("Erro ao buscar espécies: " . $conn->error);
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Lista de Espécies - Sistema Pet</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
+
         body {
             margin: 0;
             background-color: #F7F6E3;
@@ -45,6 +64,7 @@
             margin: 40px auto;
             padding: 0 25px;
             flex: 1;
+            width: 100%;
         }
 
         .cabecalho-pagina {
@@ -89,6 +109,7 @@
             border-radius: 15px;
             padding: 12px;
             box-shadow: 0 5px 18px rgba(78, 53, 30, 0.10);
+            overflow-x: auto;
         }
 
         .table {
@@ -186,6 +207,7 @@
         }
 
         @media (max-width: 700px) {
+
             .topo {
                 padding: 20px;
                 flex-direction: column;
@@ -201,109 +223,160 @@
                 width: 100%;
                 text-align: center;
             }
+
         }
+
     </style>
+
 </head>
 
 <body>
 
 <header class="topo">
+
     <div>
+
         <h1>Sistema Pet</h1>
+
         <p>Gerenciamento de animais</p>
+
     </div>
+
 </header>
+
 
 <main class="conteudo">
 
+
     <div class="cabecalho-pagina">
+
         <div>
+
             <h2>Lista de Espécies</h2>
-            <p>Gerencie as espécies cadastradas para vinculação com os pets.</p>
+
+            <p>
+                Gerencie as espécies cadastradas para vinculação com os pets.
+            </p>
+
         </div>
 
+
         <a href="cadastro_especie.php" class="botao-principal">
+
             + Nova Espécie
+
         </a>
+
     </div>
+
 
     <div class="tabela-box">
 
         <table class="table">
 
             <thead>
+
                 <tr>
-                    <th style="width: 100px;">ID</th>
-                    <th>Nome da Espécie</th>
-                    <th style="width: 180px; text-align: center;">Ações</th>
+
+                    <th style="width: 100px;">
+                        ID
+                    </th>
+
+                    <th>
+                        Nome da Espécie
+                    </th>
+
+                    <th style="width: 180px; text-align: center;">
+                        Ações
+                    </th>
+
                 </tr>
+
             </thead>
+
 
             <tbody>
 
-                <tr>
-                    <td><span class="badge-id">#1</span></td>
-                    <td style="font-weight: 600;">Cachorro</td>
-                    <td style="text-align: center;">
-                        <a href="editar_especie.php?id=1" class="btn-acao editar">
-                            Editar
-                        </a>
 
-                        <a href="deletar_especie.php?id=1"
-                           class="btn-acao excluir"
-                           onclick="return confirm('Deseja excluir esta espécie?')">
-                            Excluir
-                        </a>
-                    </td>
-                </tr>
+                <?php if ($resultado->num_rows > 0): ?>
 
-                <tr>
-                    <td><span class="badge-id">#2</span></td>
-                    <td style="font-weight: 600;">Gato</td>
-                    <td style="text-align: center;">
-                        <a href="editar_especie.php?id=2" class="btn-acao editar">
-                            Editar
-                        </a>
 
-                        <a href="deletar_especie.php?id=2"
-                           class="btn-acao excluir"
-                           onclick="return confirm('Deseja excluir esta espécie?')">
-                            Excluir
-                        </a>
-                    </td>
-                </tr>
+                    <?php while ($especie = $resultado->fetch_assoc()): ?>
 
-                <tr>
-                    <td><span class="badge-id">#3</span></td>
-                    <td style="font-weight: 600;">Coelho</td>
-                    <td style="text-align: center;">
-                        <a href="editar_especie.php?id=3" class="btn-acao editar">
-                            Editar
-                        </a>
 
-                        <a href="deletar_especie.php?id=3"
-                           class="btn-acao excluir"
-                           onclick="return confirm('Deseja excluir esta espécie?')">
-                            Excluir
-                        </a>
-                    </td>
-                </tr>
+                        <tr>
 
-                <tr>
-                    <td><span class="badge-id">#4</span></td>
-                    <td style="font-weight: 600;">Pássaro</td>
-                    <td style="text-align: center;">
-                        <a href="editar_especie.php?id=4" class="btn-acao editar">
-                            Editar
-                        </a>
 
-                        <a href="deletar_especie.php?id=4"
-                           class="btn-acao excluir"
-                           onclick="return confirm('Deseja excluir esta espécie?')">
-                            Excluir
-                        </a>
-                    </td>
-                </tr>
+                            <td>
+
+                                <span class="badge-id">
+
+                                    #<?= $especie['id'] ?>
+
+                                </span>
+
+                            </td>
+
+
+                            <td style="font-weight: 600;">
+
+                                <?= htmlspecialchars($especie['nome']) ?>
+
+                            </td>
+
+
+                            <td style="text-align: center;">
+
+
+                                <a
+                                    href="editar_especie.php?id=<?= $especie['id'] ?>"
+                                    class="btn-acao editar"
+                                >
+
+                                    Editar
+
+                                </a>
+
+
+                                <a
+                                    href="deletar_especie.php?id=<?= $especie['id'] ?>"
+                                    class="btn-acao excluir"
+                                    onclick="return confirm('Deseja excluir esta espécie?')"
+                                >
+
+                                    Excluir
+
+                                </a>
+
+
+                            </td>
+
+
+                        </tr>
+
+
+                    <?php endwhile; ?>
+
+
+                <?php else: ?>
+
+
+                    <tr>
+
+                        <td
+                            colspan="3"
+                            style="text-align: center; padding: 30px;"
+                        >
+
+                            Nenhuma espécie cadastrada.
+
+                        </td>
+
+                    </tr>
+
+
+                <?php endif; ?>
+
 
             </tbody>
 
@@ -311,13 +384,24 @@
 
     </div>
 
-    <a href="index.php" class="voltar">← Voltar para o início</a>
+
+    <a href="index.php" class="voltar">
+
+        ← Voltar para o início
+
+    </a>
+
 
 </main>
 
+
 <footer class="rodape">
+
     Sistema Pet
+
 </footer>
 
+
 </body>
+
 </html>

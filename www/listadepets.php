@@ -1,13 +1,45 @@
+<?php
+
+require_once __DIR__ . "/conexao.php";
+
+$sql = "SELECT
+            pet.id,
+            pet.nome,
+            pet.nascimento,
+            pet.genero,
+            pet.prontuario,
+            especie.nome AS especie
+        FROM pet
+        INNER JOIN especie
+            ON pet.especie_id = especie.id
+        ORDER BY pet.id ASC";
+
+$resultado = $conn->query($sql);
+
+if (!$resultado) {
+    die("Erro ao buscar pets: " . $conn->error);
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Lista de Pets - Sistema Pet</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
 
     <style>
+
         body {
             margin: 0;
             background-color: #F7F6E3;
@@ -45,6 +77,7 @@
             margin: 40px auto;
             padding: 0 25px;
             flex: 1;
+            width: 100%;
         }
 
         .cabecalho-pagina {
@@ -76,38 +109,11 @@
             text-decoration: none;
             font-weight: bold;
             transition: 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .botao-principal:hover {
             background-color: #4E351E;
             color: #F7F6E3;
-        }
-
-        /* Barra de pesquisa/filtro */
-        .card-filtro {
-            background-color: #FFFFFF;
-            border: 1px solid #AFA386;
-            border-radius: 12px;
-            padding: 15px 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 3px 10px rgba(78, 53, 30, 0.06);
-        }
-
-        .form-control-busca {
-            border: 1px solid #AFA386;
-            border-radius: 7px;
-            padding: 9px 12px;
-            background-color: #F7F6E3;
-            color: #4E351E;
-        }
-
-        .form-control-busca:focus {
-            border-color: #546745;
-            box-shadow: 0 0 0 3px rgba(84, 103, 69, 0.15);
-            background-color: #FFFFFF;
         }
 
         .tabela-box {
@@ -151,7 +157,6 @@
             background-color: #F7F6E3;
         }
 
-        /* Badges estilizadas para Gênero */
         .badge-genero {
             padding: 6px 12px;
             border-radius: 20px;
@@ -171,7 +176,6 @@
             color: #F7F6E3;
         }
 
-        /* Botões de Ação */
         .btn-acao {
             padding: 6px 14px;
             border-radius: 6px;
@@ -211,7 +215,6 @@
             color: #6C5234;
             text-decoration: none;
             font-weight: 600;
-            transition: 0.2s ease;
         }
 
         .voltar:hover {
@@ -228,6 +231,7 @@
         }
 
         @media (max-width: 700px) {
+
             .topo {
                 padding: 20px;
                 flex-direction: column;
@@ -241,112 +245,206 @@
 
             .botao-principal {
                 width: 100%;
-                justify-content: center;
+                text-align: center;
             }
+
         }
+
     </style>
+
 </head>
+
 
 <body>
 
+
 <header class="topo">
+
     <div>
+
         <h1>Sistema Pet</h1>
+
         <p>Gerenciamento de animais</p>
+
     </div>
+
 </header>
+
 
 <main class="conteudo">
 
+
     <div class="cabecalho-pagina">
+
         <div>
+
             <h2>Lista de Pets</h2>
-            <p>Consulte e gerencie os pets cadastrados no sistema.</p>
+
+            <p>
+                Consulte e gerencie os pets cadastrados no sistema.
+            </p>
+
         </div>
 
-        <a href="cadastro_pet.php" class="botao-principal">
+
+        <a
+            href="cadastro_pet.php"
+            class="botao-principal"
+        >
             + Novo Pet
         </a>
+
     </div>
 
-    <!-- Barra de busca rápida -->
-    <div class="card-filtro">
-        <div class="row g-2">
-            <div class="col-md-9">
-                <input type="text" class="form-control form-control-busca" placeholder="Pesquisar pet por nome ou espécie...">
-            </div>
-            <div class="col-md-3">
-                <button class="btn btn-salvar w-100" style="background-color: #546745; color: #F7F6E3; font-weight: bold; border-radius: 7px; padding: 9px;">
-                    Buscar
-                </button>
-            </div>
-        </div>
-    </div>
 
     <div class="tabela-box">
 
         <table class="table">
 
             <thead>
+
                 <tr>
-                    <th style="width: 80px;">ID</th>
-                    <th>Nome</th>
-                    <th>Nascimento</th>
-                    <th>Espécie</th>
-                    <th>Gênero</th>
-                    <th style="width: 180px; text-align: center;">Ações</th>
+
+                    <th style="width: 80px;">
+                        ID
+                    </th>
+
+                    <th>
+                        Nome
+                    </th>
+
+                    <th>
+                        Nascimento
+                    </th>
+
+                    <th>
+                        Espécie
+                    </th>
+
+                    <th>
+                        Gênero
+                    </th>
+
+                    <th style="width: 190px; text-align: center;">
+                        Ações
+                    </th>
+
                 </tr>
+
             </thead>
+
 
             <tbody>
 
-                <tr>
-                    <td><strong>#1</strong></td>
-                    <td style="font-weight: 600;">Rex</td>
-                    <td>15/02/2021</td>
-                    <td>Cachorro</td>
-                    <td><span class="badge-genero badge-macho">Macho</span></td>
-                    <td style="text-align: center;">
-                        <a href="editar_pet.php?id=1" class="btn-acao editar">Editar</a>
-                        <a href="deletar_pet.php?id=1"
-                           class="btn-acao excluir"
-                           onclick="return confirm('Deseja realmente excluir este pet?')">
-                            Excluir
-                        </a>
-                    </td>
-                </tr>
+
+            <?php if ($resultado->num_rows > 0): ?>
+
+
+                <?php while ($pet = $resultado->fetch_assoc()): ?>
+
+                    <tr>
+
+
+                        <td>
+
+                            <strong>
+                                #<?= $pet["id"] ?>
+                            </strong>
+
+                        </td>
+
+
+                        <td style="font-weight: 600;">
+
+                            <?= htmlspecialchars($pet["nome"]) ?>
+
+                        </td>
+
+
+                        <td>
+
+                            <?= date(
+                                "d/m/Y",
+                                strtotime($pet["nascimento"])
+                            ) ?>
+
+                        </td>
+
+
+                        <td>
+
+                            <?= htmlspecialchars($pet["especie"]) ?>
+
+                        </td>
+
+
+                        <td>
+
+                            <?php if ($pet["genero"] === "M"): ?>
+
+                                <span class="badge-genero badge-macho">
+                                    Macho
+                                </span>
+
+                            <?php else: ?>
+
+                                <span class="badge-genero badge-femea">
+                                    Fêmea
+                                </span>
+
+                            <?php endif; ?>
+
+                        </td>
+
+
+                        <td style="text-align: center;">
+
+
+                            <a
+                                href="editar_pet.php?id=<?= $pet["id"] ?>"
+                                class="btn-acao editar"
+                            >
+                                Editar
+                            </a>
+
+
+                            <a
+                                href="deletar_pet.php?id=<?= $pet["id"] ?>"
+                                class="btn-acao excluir"
+                                onclick="return confirm('Deseja realmente excluir este pet?')"
+                            >
+                                Excluir
+                            </a>
+
+
+                        </td>
+
+
+                    </tr>
+
+
+                <?php endwhile; ?>
+
+
+            <?php else: ?>
+
 
                 <tr>
-                    <td><strong>#2</strong></td>
-                    <td style="font-weight: 600;">Mimi</td>
-                    <td>08/07/2022</td>
-                    <td>Gato</td>
-                    <td><span class="badge-genero badge-femea">Fêmea</span></td>
-                    <td style="text-align: center;">
-                        <a href="editar_pet.php?id=2" class="btn-acao editar">Editar</a>
-                        <a href="deletar_pet.php?id=2"
-                           class="btn-acao excluir"
-                           onclick="return confirm('Deseja realmente excluir este pet?')">
-                            Excluir
-                        </a>
+
+                    <td
+                        colspan="6"
+                        style="text-align: center; padding: 30px;"
+                    >
+
+                        Nenhum pet cadastrado.
+
                     </td>
+
                 </tr>
 
-                <tr>
-                    <td><strong>#3</strong></td>
-                    <td style="font-weight: 600;">Pingo</td>
-                    <td>12/09/2023</td>
-                    <td>Coelho</td>
-                    <td><span class="badge-genero badge-macho">Macho</span></td>
-                    <td style="text-align: center;">
-                        <a href="editar_pet.php?id=3" class="btn-acao editar">Editar</a>
-                        <a href="deletar_pet.php?id=3"
-                           class="btn-acao excluir"
-                           onclick="return confirm('Deseja realmente excluir este pet?')">
-                            Excluir
-                        </a>
-                    </td>
-                </tr>
+
+            <?php endif; ?>
+
 
             </tbody>
 
@@ -354,15 +452,27 @@
 
     </div>
 
-    <a href="index.php" class="voltar">
+
+    <a
+        href="index.php"
+        class="voltar"
+    >
+
         ← Voltar para o início
+
     </a>
+
 
 </main>
 
+
 <footer class="rodape">
+
     Sistema Pet
+
 </footer>
 
+
 </body>
+
 </html>

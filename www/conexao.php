@@ -1,21 +1,16 @@
 <?php
 
-$host = "mysql";
+$servidor = "banco";
 $usuario = "pet";
 $senha = "pet123";
 $banco = "petshop";
 
-$conexao = mysqli_connect(
-    $host,
-    $usuario,
-    $senha,
-    $banco
-);
+$conn = new mysqli($servidor, $usuario, $senha, $banco);
 
-if (!$conexao) {
-    die("Erro ao conectar ao banco de dados.");
+if ($conn->connect_error) {
+    die("Erro na conexão com o banco: " . $conn->connect_error);
 }
 
-mysqli_set_charset($conexao, "utf8mb4");
+$conn->set_charset("utf8mb4");
 
 ?>
