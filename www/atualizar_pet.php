@@ -1,5 +1,5 @@
-<?php
 
+<?php
 require_once __DIR__ . "/conexao.php";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
@@ -7,85 +7,114 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     exit;
 }
 
-$id = $_POST["id"] ?? "";
+$id = filter_input(INPUT_POST, "id", FILTER_VALIDATE_INT);
 $nome = trim($_POST["nome"] ?? "");
 $nascimento = $_POST["nascimento"] ?? "";
-$especie_id = $_POST["especie"] ?? "";
+$especie = filter_input(INPUT_POST, "especie", FILTER_VALIDATE_INT);
 $prontuario = trim($_POST["prontuario"] ?? "");
 $genero = $_POST["genero"] ?? "";
 
-
-/* Verifica o ID */
-
-if ($id === "" || !is_numeric($id)) {
-    die("ID do pet inválido.");
+if (!$id || $nome === "" || $nascimento === "" || !$especie || !in_array($genero, ["M", "F"], true)) {
+    die("Preencha todos os campos obrigatórios corretamente.");
 }
 
-$id = (int) $id;
+$stmt = $conn->prepare("SELECT foto FROM pet WHERE id = ?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$resultado = $stmt->get_result();
 
-
-/* Verifica os campos */
-
-if ($nome === "") {
-    die("O nome do pet é obrigatório.");
+if ($resultado->num_rows === 0) {
+    die("Pet não encontrado.");
 }
 
-if ($nascimento === "") {
-    die("A data de nascimento é obrigatória.");
+$petAtual = $resultado->fetch_assoc();
+$fotoAtual = $petAtual["foto"] ?? "";
+$stmt->close();
+
+$novaFoto = $fotoAtual;
+$arquivoAntigo = "";
+
+if (isset($_FILES["foto"]) && $_FILES["foto"]["error"] !== UPLOAD_ERR_NO_FILE) {
+
+    if ($_FILES["foto"]["error"] !== UPLOAD_ERR_OK) {
+        die("Erro ao enviar a foto.");
+    }
+
+    if ($_FILES["foto"]["size"] > 5 * 1024 * 1024) {
+        die("A foto deve ter no máximo 5 MB.");
+    }
+
+    $tiposPermitidos = [
+        "image/jpeg" => "jpg",
+        "image/png" => "png",
+        "image/webp" => "webp"
+    ];
+
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $tipo = $finfo->file($_FILES["foto"]["tmp_name"]);
+
+    if (!isset($tiposPermitidos[$tipo]) || !getimagesize($_FILES["foto"]["tmp_name"])) {
+        die("Formato de imagem inválido. Envie JPG, PNG ou WEBP.");
+    }
+
+    $pastaUploads = __DIR__ . "/uploads/";
+
+    if (!is_dir($pastaUploads) && !mkdir($pastaUploads, 0755, true)) {
+        die("Não foi possível criar a pasta de imagens.");
+    }
+
+    $nomeArquivo = bin2hex(random_bytes(16)) . "." . $tiposPermitidos[$tipo];
+    $caminhoCompleto = $pastaUploads . $nomeArquivo;
+
+    if (!move_uploaded_file($_FILES["foto"]["tmp_name"], $caminhoCompleto)) {
+        die("Não foi possível salvar a nova foto.");
+    }
+
+    $novaFoto = "uploads/" . $nomeArquivo;
+    $arquivoAntigo = $fotoAtual;
 }
-
-if ($especie_id === "" || !is_numeric($especie_id)) {
-    die("Selecione uma espécie.");
-}
-
-if ($genero !== "M" && $genero !== "F") {
-    die("Selecione o gênero.");
-}
-
-$especie_id = (int) $especie_id;
-
-
-/* Atualiza o pet */
 
 $sql = "UPDATE pet
-        SET nome = ?,
-            nascimento = ?,
-            genero = ?,
-            prontuario = ?,
-            especie_id = ?
+        SET nome = ?, nascimento = ?, genero = ?, prontuario = ?, especie_id = ?, foto = ?
         WHERE id = ?";
 
 $stmt = $conn->prepare($sql);
 
-if ($stmt === false) {
-    die("Erro ao preparar a atualização: " . $conn->error);
+if (!$stmt) {
+    if ($novaFoto !== $fotoAtual) {
+        @unlink(__DIR__ . "/" . $novaFoto);
+    }
+    die("Erro ao preparar atualização: " . $conn->error);
 }
 
 $stmt->bind_param(
-    "ssssii",
+    "ssssisi",
     $nome,
     $nascimento,
     $genero,
     $prontuario,
-    $especie_id,
+    $especie,
+    $novaFoto,
     $id
 );
 
-
-/* Executa a atualização */
-
-if ($stmt->execute()) {
-
-    $stmt->close();
-    $conn->close();
-
-    header("Location: listadepets.php");
-    exit;
-
-} else {
-
+if (!$stmt->execute()) {
+    if ($novaFoto !== $fotoAtual) {
+        @unlink(__DIR__ . "/" . $novaFoto);
+    }
     die("Erro ao atualizar pet: " . $stmt->error);
-
 }
 
+$stmt->close();
+
+if ($arquivoAntigo !== "" && $arquivoAntigo !== $novaFoto) {
+    $caminhoAntigo = __DIR__ . "/" . $arquivoAntigo;
+
+    if (is_file($caminhoAntigo)) {
+        unlink($caminhoAntigo);
+    }
+}
+
+header("Location: listadepets.php");
+exit;
 ?>

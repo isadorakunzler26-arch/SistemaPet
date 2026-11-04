@@ -8,6 +8,7 @@ $sql = "SELECT
             pet.nascimento,
             pet.genero,
             pet.prontuario,
+            pet.foto,
             especie.nome AS especie
         FROM pet
         INNER JOIN especie
@@ -28,7 +29,6 @@ if (!$resultado) {
 <head>
 
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Lista de Pets - Sistema Pet</title>
@@ -73,7 +73,7 @@ if (!$resultado) {
         }
 
         .conteudo {
-            max-width: 1150px;
+            max-width: 1250px;
             margin: 40px auto;
             padding: 0 25px;
             flex: 1;
@@ -155,6 +155,27 @@ if (!$resultado) {
 
         .table tbody tr:hover {
             background-color: #F7F6E3;
+        }
+
+        .foto-pet {
+            width: 65px;
+            height: 65px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 2px solid #AFA386;
+        }
+
+        .sem-foto {
+            width: 65px;
+            height: 65px;
+            border-radius: 10px;
+            background-color: #E5E1CC;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6C5234;
+            font-size: 11px;
+            text-align: center;
         }
 
         .badge-genero {
@@ -254,9 +275,7 @@ if (!$resultado) {
 
 </head>
 
-
 <body>
-
 
 <header class="topo">
 
@@ -270,9 +289,7 @@ if (!$resultado) {
 
 </header>
 
-
 <main class="conteudo">
-
 
     <div class="cabecalho-pagina">
 
@@ -286,7 +303,6 @@ if (!$resultado) {
 
         </div>
 
-
         <a
             href="cadastro_pet.php"
             class="botao-principal"
@@ -296,7 +312,6 @@ if (!$resultado) {
 
     </div>
 
-
     <div class="tabela-box">
 
         <table class="table">
@@ -305,27 +320,19 @@ if (!$resultado) {
 
                 <tr>
 
-                    <th style="width: 80px;">
-                        ID
-                    </th>
+                    <th>Foto</th>
 
-                    <th>
-                        Nome
-                    </th>
+                    <th>ID</th>
 
-                    <th>
-                        Nascimento
-                    </th>
+                    <th>Nome</th>
 
-                    <th>
-                        Espécie
-                    </th>
+                    <th>Nascimento</th>
 
-                    <th>
-                        Gênero
-                    </th>
+                    <th>Espécie</th>
 
-                    <th style="width: 190px; text-align: center;">
+                    <th>Gênero</th>
+
+                    <th style="text-align: center;">
                         Ações
                     </th>
 
@@ -333,17 +340,33 @@ if (!$resultado) {
 
             </thead>
 
-
             <tbody>
 
-
             <?php if ($resultado->num_rows > 0): ?>
-
 
                 <?php while ($pet = $resultado->fetch_assoc()): ?>
 
                     <tr>
 
+                        <td>
+
+                            <?php if (!empty($pet["foto"])): ?>
+
+                                <img
+                                    src="<?= htmlspecialchars($pet["foto"]) ?>"
+                                    alt="Foto de <?= htmlspecialchars($pet["nome"]) ?>"
+                                    class="foto-pet"
+                                >
+
+                            <?php else: ?>
+
+                                <div class="sem-foto">
+                                    Sem foto
+                                </div>
+
+                            <?php endif; ?>
+
+                        </td>
 
                         <td>
 
@@ -353,13 +376,11 @@ if (!$resultado) {
 
                         </td>
 
-
                         <td style="font-weight: 600;">
 
                             <?= htmlspecialchars($pet["nome"]) ?>
 
                         </td>
-
 
                         <td>
 
@@ -370,13 +391,11 @@ if (!$resultado) {
 
                         </td>
 
-
                         <td>
 
                             <?= htmlspecialchars($pet["especie"]) ?>
 
                         </td>
-
 
                         <td>
 
@@ -396,9 +415,7 @@ if (!$resultado) {
 
                         </td>
 
-
                         <td style="text-align: center;">
-
 
                             <a
                                 href="editar_pet.php?id=<?= $pet["id"] ?>"
@@ -406,7 +423,6 @@ if (!$resultado) {
                             >
                                 Editar
                             </a>
-
 
                             <a
                                 href="deletar_pet.php?id=<?= $pet["id"] ?>"
@@ -416,23 +432,18 @@ if (!$resultado) {
                                 Excluir
                             </a>
 
-
                         </td>
-
 
                     </tr>
 
-
                 <?php endwhile; ?>
 
-
             <?php else: ?>
-
 
                 <tr>
 
                     <td
-                        colspan="6"
+                        colspan="7"
                         style="text-align: center; padding: 30px;"
                     >
 
@@ -442,9 +453,7 @@ if (!$resultado) {
 
                 </tr>
 
-
             <?php endif; ?>
-
 
             </tbody>
 
@@ -452,26 +461,20 @@ if (!$resultado) {
 
     </div>
 
-
     <a
         href="index.php"
         class="voltar"
     >
-
         ← Voltar para o início
-
     </a>
 
-
 </main>
-
 
 <footer class="rodape">
 
     Sistema Pet
 
 </footer>
-
 
 </body>
 

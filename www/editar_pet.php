@@ -1,5 +1,5 @@
-<?php
 
+<?php
 require_once __DIR__ . "/conexao.php";
 
 $id = $_GET["id"] ?? "";
@@ -10,30 +10,13 @@ if ($id === "" || !is_numeric($id)) {
 
 $id = (int) $id;
 
-
-/* BUSCAR O PET */
-
-$sql = "SELECT 
-            id,
-            nome,
-            nascimento,
-            genero,
-            prontuario,
-            especie_id
+$sql = "SELECT id, nome, nascimento, genero, prontuario, especie_id, foto
         FROM pet
         WHERE id = ?";
 
 $stmt = $conn->prepare($sql);
-
-if (!$stmt) {
-    die("Erro ao preparar consulta do pet: " . $conn->error);
-}
-
 $stmt->bind_param("i", $id);
-
-if (!$stmt->execute()) {
-    die("Erro ao buscar pet: " . $stmt->error);
-}
+$stmt->execute();
 
 $resultado = $stmt->get_result();
 
@@ -42,38 +25,24 @@ if ($resultado->num_rows === 0) {
 }
 
 $pet = $resultado->fetch_assoc();
-
 $stmt->close();
 
-
-/* BUSCAR AS ESPÉCIES */
-
-$sqlEspecies = "SELECT id, nome
-                FROM especie
-                ORDER BY nome ASC";
-
+$sqlEspecies = "SELECT id, nome FROM especie ORDER BY nome ASC";
 $resultadoEspecies = $conn->query($sqlEspecies);
 
 if (!$resultadoEspecies) {
     die("Erro ao buscar espécies: " . $conn->error);
 }
-
 ?>
 
 <!DOCTYPE html>
-
 <html lang="pt-BR">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Editar Pet - Sistema Pet</title>
 
     <style>
-
         * {
             box-sizing: border-box;
         }
@@ -138,7 +107,7 @@ if (!$resultadoEspecies) {
             font-weight: bold;
         }
 
-        input,
+        input:not([type="radio"]),
         select,
         textarea {
             width: 100%;
@@ -160,10 +129,6 @@ if (!$resultadoEspecies) {
             gap: 15px;
         }
 
-        .genero {
-            width: auto;
-        }
-
         .generos label {
             border: 1px solid #AFA386;
             padding: 12px 20px;
@@ -175,6 +140,21 @@ if (!$resultadoEspecies) {
         .generos input {
             width: auto;
             margin-right: 7px;
+        }
+
+        .foto-atual {
+            width: 160px;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid #AFA386;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .sem-foto {
+            margin-bottom: 12px;
+            color: #6C5234;
         }
 
         .botoes {
@@ -218,62 +198,31 @@ if (!$resultadoEspecies) {
             text-align: center;
             padding: 18px;
         }
-
     </style>
-
 </head>
-
 
 <body>
 
-
 <header class="topo">
-
     <h1>Sistema Pet</h1>
-
     <p>Gerenciamento de animais</p>
-
 </header>
-
 
 <main class="conteudo">
 
-
     <div class="titulo">
-
         <h2>Editar Pet</h2>
-
-        <p>Altere os dados do pet cadastrado.</p>
-
+        <p>Altere os dados e a foto do pet cadastrado.</p>
     </div>
-
 
     <div class="formulario">
 
+        <form action="atualizar_pet.php" method="POST" enctype="multipart/form-data">
 
-        <form
-            action="atualizar_pet.php"
-            method="POST"
-        >
-
-
-            <!-- ID DO PET -->
-
-            <input
-                type="hidden"
-                name="id"
-                value="<?= $pet["id"] ?>"
-            >
-
-
-            <!-- NOME -->
+            <input type="hidden" name="id" value="<?= $pet["id"] ?>">
 
             <div class="campo">
-
-                <label for="nome">
-                    Nome do Pet
-                </label>
-
+                <label for="nome">Nome do Pet</label>
                 <input
                     type="text"
                     id="nome"
@@ -281,18 +230,10 @@ if (!$resultadoEspecies) {
                     value="<?= htmlspecialchars($pet["nome"]) ?>"
                     required
                 >
-
             </div>
 
-
-            <!-- NASCIMENTO -->
-
             <div class="campo">
-
-                <label for="nascimento">
-                    Nascimento
-                </label>
-
+                <label for="nascimento">Nascimento</label>
                 <input
                     type="date"
                     id="nascimento"
@@ -300,82 +241,34 @@ if (!$resultadoEspecies) {
                     value="<?= htmlspecialchars($pet["nascimento"]) ?>"
                     required
                 >
-
             </div>
 
-
-            <!-- ESPÉCIE -->
-
             <div class="campo">
-
-                <label for="especie">
-                    Espécie
-                </label>
-
-                <select
-                    id="especie"
-                    name="especie"
-                    required
-                >
-
-                    <option value="">
-                        Selecione uma espécie
-                    </option>
-
+                <label for="especie">Espécie</label>
+                <select id="especie" name="especie" required>
+                    <option value="">Selecione uma espécie</option>
 
                     <?php while ($especie = $resultadoEspecies->fetch_assoc()): ?>
-
                         <option
                             value="<?= $especie["id"] ?>"
-                            <?php
-                            if ($pet["especie_id"] == $especie["id"]) {
-                                echo "selected";
-                            }
-                            ?>
+                            <?= $pet["especie_id"] == $especie["id"] ? "selected" : "" ?>
                         >
-
                             <?= htmlspecialchars($especie["nome"]) ?>
-
                         </option>
-
                     <?php endwhile; ?>
-
-
                 </select>
-
             </div>
 
-
-            <!-- PRONTUÁRIO -->
-
             <div class="campo">
-
-                <label for="prontuario">
-                    Prontuário
-                </label>
-
-                <textarea
-                    id="prontuario"
-                    name="prontuario"
-                ><?= htmlspecialchars($pet["prontuario"] ?? "") ?></textarea>
-
+                <label for="prontuario">Prontuário</label>
+                <textarea id="prontuario" name="prontuario"><?= htmlspecialchars($pet["prontuario"] ?? "") ?></textarea>
             </div>
 
-
-            <!-- GÊNERO -->
-
             <div class="campo">
-
-                <label>
-                    Gênero
-                </label>
-
+                <label>Gênero</label>
 
                 <div class="generos">
-
-
                     <label>
-
                         <input
                             type="radio"
                             name="genero"
@@ -383,71 +276,63 @@ if (!$resultadoEspecies) {
                             <?= $pet["genero"] === "M" ? "checked" : "" ?>
                             required
                         >
-
                         Macho
-
                     </label>
 
-
                     <label>
-
                         <input
                             type="radio"
                             name="genero"
                             value="F"
                             <?= $pet["genero"] === "F" ? "checked" : "" ?>
                         >
-
                         Fêmea
-
                     </label>
-
-
                 </div>
-
             </div>
 
+            <div class="campo">
+                <label>Foto atual</label>
 
-            <!-- BOTÕES -->
+                <?php if (!empty($pet["foto"]) && file_exists(__DIR__ . "/" . $pet["foto"])): ?>
+                    <img
+                        src="<?= htmlspecialchars($pet["foto"]) ?>"
+                        alt="Foto de <?= htmlspecialchars($pet["nome"]) ?>"
+                        class="foto-atual"
+                    >
+                <?php else: ?>
+                    <p class="sem-foto">Este pet ainda não possui foto.</p>
+                <?php endif; ?>
+            </div>
+
+            <div class="campo">
+                <label for="foto">Escolher nova foto</label>
+                <input
+                    type="file"
+                    id="foto"
+                    name="foto"
+                    accept="image/jpeg,image/png,image/webp"
+                >
+                <small>Deixe vazio para manter a foto atual. Máximo: 5 MB.</small>
+            </div>
 
             <div class="botoes">
+                <a href="listadepets.php" class="botao voltar">Voltar</a>
 
-
-                <a
-                    href="listadepets.php"
-                    class="botao voltar"
-                >
-                    Voltar
-                </a>
-
-
-                <button
-                    type="submit"
-                    class="botao salvar"
-                >
+                <button type="submit" class="botao salvar">
                     Salvar Alteração
                 </button>
-
-
             </div>
-
 
         </form>
 
-
     </div>
-
 
 </main>
 
-
 <footer class="rodape">
-
     Sistema Pet
-
 </footer>
 
-
 </body>
-
 </html>
